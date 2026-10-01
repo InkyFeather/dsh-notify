@@ -51,24 +51,45 @@
 需要 Windows（卡片助手基于 WPF + PowerShell 5.1）。
 
 ```powershell
-dsh plugin --profile desktop add "link:<本仓库的绝对路径>"
+dsh plugin --profile desktop add "https://github.com/InkyFeather/dsh-notify.git"
 ```
 
+也可以写成简写 `github:InkyFeather/dsh-notify`。要锁定版本就在末尾加 `#<tag 或 commit>`，
+例如 `"https://github.com/InkyFeather/dsh-notify.git#v0.1.0"`。
+
 或者让 DSH 里的 Agent 用 `plugin_manager` 工具执行 `install_bundle`，
-`target` 传 `link:<绝对路径>`；它会自动写入 profile 的 `dependencies` 与 `dsh.profile.bundles`。
+`target` 传上面这个安装源即可 —— 它接受 git 仓库 URL、`github:` 简写、tarball，
+以及 `link:<绝对路径>`（开发用）。
+
+> 本插件**没有构建步骤**（客户端半是纯 JS，由页面的模块加载器直接加载），
+> 所以 git 安装不会触发 pnpm 的 `prepare` 构建白名单提示。
 
 **卸载**：用 `plugin_manager` 的 `remove_bundle`，或从 profile 的 `dependencies` 中删掉 `dsh-notify`。
+
+**参与开发**（改代码即时生效）：把克隆下来的目录用 `link:` 装：
+
+```powershell
+dsh plugin --profile desktop add "link:<克隆目录的绝对路径>"
+```
 
 ## 设置
 
 三种途径，**优先级：`settings.json` > profile 的 `config` > 内置默认**。
 每条 `[apply]` 日志里的 `settingsSource` 会告诉你**最后是谁说了算**。
 
-### 1. `settings.json`（插件目录内，推荐）
+### 1. 设置文件（推荐）
+
+复制到 **用户级位置** `$DSH_HOME/dsh-notify.json`（默认 `C:\Users\<你>\.dsh\dsh-notify.json`）：
 
 ```powershell
-Copy-Item settings.example.json settings.json
+Copy-Item settings.example.json "$env:USERPROFILE\.dsh\dsh-notify.json"
 ```
+
+> 为什么不放插件目录：从 git / npm 安装时插件本体在 `node_modules/dsh-notify/` 里，
+> 放那儿**重装插件就会被整个替换掉**。
+> 插件目录的 `settings.json` 也仍然支持（兼容 `link:` 开发安装的历史位置）；
+> 两个都存在时以 `$DSH_HOME` 下的为准。每次 `[apply]` 日志里的 `settingsPath`
+> 会告诉你**实际读的是哪个文件**。
 
 | 键 | 默认 | 说明 |
 |---|---|---|
