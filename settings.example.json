@@ -1,5 +1,5 @@
 {
-  "_readme": "复制本文件为 settings.json 后修改。优先级：settings.json > profile 的 config > 内置默认（每条 [apply] 日志里的 settingsSource 会告诉你最后是谁说了算）。",
+  "_readme": "复制本文件到 $DSH_HOME/dsh-notify.json（默认 %USERPROFILE%\\.dsh\\dsh-notify.json）后修改。优先级：本文件 > profile 的 config > 内置默认；每条 [apply] 日志里的 settingsSource / settingsPath 会告诉你最后是谁说了算、实际读的是哪个文件。",
 
   "_enabled": "总开关。false = 完全不弹卡片。",
   "enabled": true,

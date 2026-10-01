@@ -22,9 +22,9 @@
 | **任务完成** | 一轮任务正常结束 | `本轮已完成` |
 | **任务中断** | 任务出错且无法自愈 | `执行出错，无法自动恢复` |
 
-> 措辞原则：标题写死为分类名（卡片只回答「现在是什么情况」）；
-> 抽不出可靠短句时一律落到兜底 —— **宁可少喊，也不乱喊**。
-> `修改` / `写入` **故意不算高危**：几乎每个写操作都命中，加进去只会变噪音。
+> 措辞原则：标题写死为分类名，卡片只回答「现在是什么情况」；
+> 抽不出可靠短句时落到兜底 —— **宁可少喊，也不乱喊**
+> （`修改` / `写入` 故意不算高危：几乎每个写操作都命中，加进去只会变噪音）。
 
 有多项在等待时，第三行会带上总数：`请求「完全访问」权限（共 2 项待确认）`。
 
@@ -48,7 +48,7 @@
 
 ## 安装
 
-需要 Windows（卡片助手基于 WPF + PowerShell 5.1）。
+需要 Windows —— 原因见下方「环境要求与已知限制」。
 
 ```powershell
 dsh plugin --profile desktop add "https://github.com/InkyFeather/dsh-notify.git"
@@ -67,7 +67,7 @@ dsh plugin --profile desktop add "https://github.com/InkyFeather/dsh-notify.git"
 
 ## 设置
 
-三种途径，**优先级：`settings.json` > profile 的 `config` > 内置默认**。
+三种途径，**优先级：设置文件 > profile 的 `config` > 内置默认**。
 每条 `[apply]` 日志里的 `settingsSource` 会告诉你**最后是谁说了算**。
 
 ### 1. 设置文件（推荐）
@@ -91,9 +91,9 @@ Copy-Item settings.example.json "$env:USERPROFILE\.dsh\dsh-notify.json"
 | `quietOnFocusOnly` | `false` | `true` = 退回「只看键盘焦点」的旧规则 |
 | `autoDismissSeconds` | `0` | 卡片自动消失秒数；`0` = 不自动消失 |
 
-改完**需要一次插件重载才生效** —— HMR 只监视 `.js`，不监视 `.json`。
-最省事的触发方式：改一下 `lib/index.js` 里的 `BUILD` 字符串（保存即重载）。
-**删掉 `settings.json` 即恢复默认值。**
+改完**需要一次插件重载才生效**（它是个 `.json`，不会触发热重载）。
+最省事的方式是**直接用 DSH 设置界面**；编辑文件的话，重载插件或重启 DSH 即可。
+**删掉设置文件即恢复默认值。**
 
 ### 2. DSH 设置界面
 
@@ -119,7 +119,7 @@ DSH 宿主进程（Node）
   └─ 每 2 秒上报 {focused, visible}；消费「待打开会话」并跳转
 ```
 
-- **宿主半不知道窗口状态**，所以由页面侧上报；上报停止即推断「你不在看」。
+- **宿主半不知道窗口状态**，所以窗口状态由页面侧上报。
 - **宿主进程没有 Electron API**（它是普通 Node），所以卡片走独立 PowerShell 进程。
 - 助手**懒启动**：第一次要弹卡片时才拉起 PowerShell（冷启动 2–4 秒，期间卡片排队、就绪后补发）。
 - 点击卡片不直接导航 —— 先把 DSH 窗口拉到前台，页面拿到焦点后自己去取
@@ -128,7 +128,7 @@ DSH 宿主进程（Node）
 ## 环境要求与已知限制
 
 - **仅 Windows**：卡片助手是 WPF + PowerShell 5.1。
-- **Node ≥ 20**（宿主进程实测 v24）。
+- **DSH 桌面端**：事件契约按 **0.2.0-rc.2** 实测编写；宿主进程需 Node ≥ 20（实测 v24）。
 - **多显示器 / 非 100% DPI 缩放未验证**（开发机只有 1920×1080 @100%）。
 - **无声音提醒。**
 - 卡片**一次只显示一张**，不做视觉并排堆叠。
@@ -147,7 +147,7 @@ DSH 宿主进程（Node）
 | `client/client.js` | 客户端半：窗口状态上报 + **点击跳转的落点** |
 | `assets/helper.ps1` | WPF 置顶卡片（`-Test` 可单独试跑） |
 | `assets/*.png` | 卡片立绘与头像（**运行时加载**） |
-| `settings.example.json` | 设置模板，复制为 `settings.json` 使用 |
+| `settings.example.json` | 设置模板，复制到 `$DSH_HOME/dsh-notify.json` 使用 |
 | `preview/classification-gallery.png` | 上方截图 |
 | `cordis.patch.yml` | bundle 挂载声明 |
 
@@ -170,9 +170,9 @@ DSH 的 Windows 沙箱在 `workspace-write` 模式下需要给工作区目录**�
 `still watching` / `page hidden` / `muted:*` / `subagent session` / `duplicate` / `plugin disabled`。
 若连 `[notified]` 都没有，说明事件本身没到达。
 
-**改了 `helper.ps1` 之后卡片起不来**
+**改了 `assets/helper.ps1` 之后卡片起不来**
 
-`helper.ps1` **必须存成 UTF-8 with BOM**。无 BOM 的 UTF-8 会被 PowerShell 5.1
+`assets/helper.ps1` **必须存成 UTF-8 with BOM**。无 BOM 的 UTF-8 会被 PowerShell 5.1
 按 ANSI 读，中文字面量乱码、解析直接失败。插件每次拉起助手前会自动补 BOM，
 但你自己改完最好确认一下。
 
