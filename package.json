@@ -1,0 +1,57 @@
+{
+  "name": "dsh-notify",
+  "version": "0.1.0",
+  "private": true,
+  "description": "DSH 等待处理提示：当你看不到 DSH 时，弹出 WPF 置顶卡片提示，点击即可跳回对应会话",
+  "license": "MIT",
+  "keywords": [
+    "dsh",
+    "dsh-plugin",
+    "notification",
+    "toast",
+    "wpf",
+    "windows"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/InkyFeather/dsh-notify.git"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "type": "module",
+  "main": "lib/index.js",
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "inject": [],
+      "platform": "web"
+    }
+  },
+  "exports": {
+    ".": "./lib/index.js",
+    "./client": "./client/client.js",
+    "./cordis.patch.yml": "./cordis.patch.yml",
+    "./package.json": "./package.json"
+  },
+  "peerDependencies": {
+    "@deepseek-ai/schemastery": "^3.18.1"
+  },
+  "peerDependenciesMeta": {
+    "@deepseek-ai/schemastery": {
+      "optional": true
+    }
+  },
+  "files": [
+    "lib",
+    "client",
+    "assets",
+    "preview/classification-gallery.png",
+    "cordis.patch.yml",
+    "settings.example.json",
+    "README.md",
+    "LICENSE"
+  ]
+}

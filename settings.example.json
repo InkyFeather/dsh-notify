@@ -1,0 +1,26 @@
+{
+  "_readme": "复制本文件为 settings.json 后修改。优先级：settings.json > profile 的 config > 内置默认（每条 [apply] 日志里的 settingsSource 会告诉你最后是谁说了算）。",
+
+  "_enabled": "总开关。false = 完全不弹卡片。",
+  "enabled": true,
+
+  "_mute": "按分类静音。最常想关掉的是 completed —— 每轮任务结束都会提示一次。",
+  "mute": {
+    "permission": false,
+    "decision": false,
+    "irreversible": false,
+    "risky": false,
+    "generic": false,
+    "completed": false,
+    "interrupted": false
+  },
+
+  "_ignoreSubagents": "忽略子代理会话的一次性通知（任务完成 / 任务中断）。⚠️ 不影响审批与提问 —— 子代理同样可能触发审批，静音它会让你永远收不到。",
+  "ignoreSubagents": true,
+
+  "_quietOnFocusOnly": "false（推荐）= 窗口可见且上报仍新鲜就不打扰，无论有没有键盘焦点；true = 只看键盘焦点（你看着 DSH 但没点它时也会弹）。",
+  "quietOnFocusOnly": false,
+
+  "_autoDismissSeconds": "卡片自动消失秒数。0 = 不自动消失（只能点掉，或被事件收起）。卡片只是提示，真正的操作面在 DSH 自己的审批 / 提问面板里。",
+  "autoDismissSeconds": 0
+}
