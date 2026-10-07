@@ -240,11 +240,20 @@ $xaml = @'
         </StackPanel>
       </Grid>
 
-      <!-- 关闭按钮：最上层（对齐 CSS 的 z-index 4） -->
+      <!-- 关闭按钮：最上层（对齐 CSS 的 z-index 4）。
+           ✕ 上移 1 DIP：离屏渲染逐像素量出字形墨迹中心比盒中心低 1.25 DIP
+           （× 的墨迹落在数学轴上方，而 WPF 垂直居中的是行盒、不是墨迹）。
+           为什么不用 Padding：实测给 Border 加 Padding="0,0,0,2" 后字形包围盒
+           一个像素都没动（对垂直居中的子元素不起作用）。
+           1 DIP 是整数像素，不会引入半像素模糊。 -->
       <Border x:Name="CloseBtn" Canvas.Left="585" Canvas.Top="67" Width="26" Height="26"
               CornerRadius="7" Background="Transparent">
         <TextBlock x:Name="CloseText" Text="&#215;" FontSize="19" Foreground="#FF818A98"
-                   HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                   HorizontalAlignment="Center" VerticalAlignment="Center">
+          <TextBlock.RenderTransform>
+            <TranslateTransform Y="-1"/>
+          </TextBlock.RenderTransform>
+        </TextBlock>
       </Border>
 
     </Canvas>
