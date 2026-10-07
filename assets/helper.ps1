@@ -38,7 +38,7 @@ param(
   # 渲染 / 自测用的文案。必须和浏览器那边传同一份，否则逐像素比对没有意义。
   [string]$SampleTitle = '权限授予确认',
   [string]$SampleSession = 'MyProject · Bash',
-  [string]$SampleDetail = '要用「完全访问」权限',
+  [string]$SampleDetail = '请求「完全访问」权限',
   # 点击卡片后要拉到前台的进程（DSH 的窗口持有进程）。宿主传 process.ppid。
   [int]$TargetPid = 0
 )
@@ -243,7 +243,7 @@ $xaml = @'
       <!-- 关闭按钮：最上层（对齐 CSS 的 z-index 4） -->
       <Border x:Name="CloseBtn" Canvas.Left="585" Canvas.Top="67" Width="26" Height="26"
               CornerRadius="7" Background="Transparent">
-        <TextBlock Text="&#215;" FontSize="19" Foreground="#FF818A98"
+        <TextBlock x:Name="CloseText" Text="&#215;" FontSize="19" Foreground="#FF818A98"
                    HorizontalAlignment="Center" VerticalAlignment="Center"/>
       </Border>
 
@@ -422,6 +422,25 @@ $window.FindName('CloseBtn').Add_MouseLeftButtonUp({
   if ($null -ne $e) { $e.Handled = $true }
   Send @{ ev = 'close'; id = $script:currentId }
   Hide-Card
+})
+
+# 关闭按钮的 hover 反馈，逐值对齐参考设计的 `.close:hover { background:rgba(255,255,255,.10); color:#e7ebf2 }`：
+# 深色卡片上 10% 白就是一层灰底，同时把 ✕ 提亮。
+#
+# 为什么用事件处理器而不是 XAML 的 IsMouseOver 触发器：
+# 一是本文件已有的交互都走事件；二是悬停态没法离屏出图验证，做法越少新颖点越好。
+# 笔刷放 $script: 作用域 —— 本文件踩过一次坑：在回调里引用局部变量会拿到 $null。
+$script:closeNormalFg = New-Object System.Windows.Media.SolidColorBrush -ArgumentList ([System.Windows.Media.Color]::FromArgb(0xFF, 0x81, 0x8A, 0x98))
+$script:closeHoverFg = New-Object System.Windows.Media.SolidColorBrush -ArgumentList ([System.Windows.Media.Color]::FromArgb(0xFF, 0xE7, 0xEB, 0xF2))
+$script:closeHoverBg = New-Object System.Windows.Media.SolidColorBrush -ArgumentList ([System.Windows.Media.Color]::FromArgb(0x1A, 0xFF, 0xFF, 0xFF))
+$window.FindName('CloseBtn').Add_MouseEnter({
+  # 指针能落在这里，说明命中测试已把窗口设为可交互（否则点击穿透，收不到这个事件）
+  $window.FindName('CloseBtn').Background = $script:closeHoverBg
+  $window.FindName('CloseText').Foreground = $script:closeHoverFg
+})
+$window.FindName('CloseBtn').Add_MouseLeave({
+  $window.FindName('CloseBtn').Background = [System.Windows.Media.Brushes]::Transparent
+  $window.FindName('CloseText').Foreground = $script:closeNormalFg
 })
 $window.FindName('Root').Add_MouseLeftButtonUp({
   Send @{ ev = 'activate'; id = $script:currentId }
