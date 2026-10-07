@@ -51,11 +51,16 @@
 需要 Windows —— 原因见下方「环境要求与已知限制」。
 
 ```powershell
-dsh plugin --profile desktop add "https://github.com/InkyFeather/dsh-notify.git"
+dsh plugin --profile desktop add "github:InkyFeather/dsh-notify"
 ```
 
-也可以写成简写 `github:InkyFeather/dsh-notify`。要锁定版本就在末尾加 `#<tag 或 commit>`，
-例如 `"https://github.com/InkyFeather/dsh-notify.git#v0.1.0"`。
+> **用 `github:` 简写，不要用 `https://github.com/....git`。**
+> 实测前者走 codeload 的 tarball 单文件下载；后者的 git 协议路径在网络受限时会直接超时失败。
+
+要锁定版本就在末尾加 `#<tag 或 commit>`，例如 `"github:InkyFeather/dsh-notify#v0.1.0"`。
+
+整个包约 **1.4 MB**。若你的网络到 GitHub 较慢（常见只有几十 KB/s），
+pnpm 默认的 60 秒抓取超时会不够用 —— 见下方「疑难排查」。
 
 或者让 DSH 里的 Agent 用 `plugin_manager` 工具执行 `install_bundle`，
 `target` 传上面这个安装源即可 —— 它接受 git 仓库 URL、`github:` 简写或 tarball。
@@ -152,6 +157,19 @@ DSH 宿主进程（Node）
 | `cordis.patch.yml` | bundle 挂载声明 |
 
 ## 疑难排查
+
+**安装很慢、或报 `The operation was aborted due to timeout`**
+
+pnpm 的抓取默认只等 **60 秒**，而从网络受限地区到 GitHub 的吞吐常常只有几十 KB/s ——
+整个包约 1.4 MB，算下来正好卡在超时边缘。两条解法：
+
+```powershell
+# 1) 放宽抓取超时（最直接）
+pnpm config set fetch-timeout 300000
+
+# 2) 或给 pnpm 配代理
+pnpm config set https-proxy http://127.0.0.1:7890
+```
 
 **`pwsh` 报 `SetNamedSecurityInfoW failed (Win32 5): grantWrite(<工作区>)`**
 

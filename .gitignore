@@ -21,6 +21,9 @@ node_modules/
 *.log
 *.log.*
 
+# 打包产物（pnpm pack 生成，用于挂到 GitHub Release 供 tarball 安装）
+*.tgz
+
 # ── 系统杂物 ──────────────────────────────────────────────────────
 .DS_Store
 Thumbs.db
